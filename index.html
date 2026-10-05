@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saya's Airport - Reading & Grammar</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #0b1a2e, #1a2f44);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 16px;
+        }
+        .game {
+            max-width: 720px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f0f6fe;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .game.angry {
+            background: rgba(180, 30, 30, 0.25);
+            border-color: #e74c3c;
+            box-shadow: 0 0 40px rgba(231, 76, 60, 0.4);
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .airport {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #8ab4f8;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255,255,255,0.15);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        .saya {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(29, 53, 87, 0.8);
+            padding: 6px 16px 6px 10px;
+            border-radius: 40px;
+            width: fit-content;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .saya span {
+            background: #f1c40f;
+            color: #0b1a2e;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .timer-bar-container {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #8ab4f8;
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+        .question-box {
+            background: #0f2840;
+            border-radius: 20px;
+            padding: 18px;
+            margin: 12px 0 16px;
+            border-left: 6px solid #4a7db5;
+            transition: 0.25s;
+            min-height: 90px;
+        }
+        .question-box.angry-box {
+            background: #2a0f0f;
+            border-left-color: #e74c3c;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .question-text {
+            font-size: 19px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        .question-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8ab4f8;
+            font-weight: 700;
+        }
+        .question-tracker {
+            font-size: 12px;
+            opacity: 0.7;
+            font-weight: 600;
+        }
+        .reading-text {
+            background: #0a1f33;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            border: 1px solid #2a4a6a;
+            transition: 0.3s;
+        }
+        .reading-text em { color: #f1c40f; font-style: normal; }
+        .anger-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 14px;
+        }
+        .anger-bar {
+            flex: 1;
+            height: 12px;
+            background: #2a3f55;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #3a5a7a;
+        }
+        .anger-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4cd137, #f1c40f, #e67e22, #e74c3c);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+        }
+        .anger-label {
+            font-size: 15px;
+            font-weight: 700;
+            min-width: 50px;
+            text-align: right;
+            color: #ffb07c;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .option {
+            background: #1d3a57;
+            border: 2px solid #2f5177;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #eef6ff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+            outline: none;
+        }
+        .option:hover, .option:focus {
+            background: #2a4d73;
+            border-color: #6a9ddb;
+            transform: translateY(-1px);
+        }
+        .option:active {
+            transform: translateY(1px);
+        }
+        .option.correct { background: #1e7e34 !important; border-color: #4cd137 !important; }
+        .option.wrong { background: #7e2a2a !important; border-color: #e74c3c !important; }
+        .option.disabled { pointer-events: none; }
+        
+        .score-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #2e4a66;
+            padding-top: 14px;
+            font-size: 15px;
+        }
+        .restart-btn, .start-btn {
+            background: #e67e22;
+            border: none;
+            color: #0b1a2e;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+        .restart-btn:hover, .start-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .start-btn {
+            background: #4cd137;
+            font-size: 20px;
+            padding: 14px 40px;
+            box-shadow: 0 4px 15px rgba(76, 209, 55, 0.4);
+        }
+        .hidden { display: none !important; }
+        .difficulty-tag {
+            background: #f39c12;
+            color: #0b1a2e;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        /* Mobile adaptation */
+        @media (max-width: 480px) {
+            body { padding: 8px; }
+            .game { border-radius: 20px; padding: 16px 12px; }
+            .question-text { font-size: 16px; }
+            .option { padding: 10px 16px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game" id="gameApp">
+    <div class="airport">
+        <span>✈️ TERMINAL 4</span>
+        <span>🆘 SAYA</span>
+    </div>
+    <div class="saya">
+        <span>👩</span> Saya · stuck at airport
+    </div>
+
+    <!-- STORY SCREEN -->
+    <div id="storyScreen" style="text-align: center; padding: 10px;">
+        <h1 style="font-size: 28px; margin-bottom: 4px;">🛫 Lost in Transit</h1>
+        <div style="font-size: 15px; opacity: 0.8; margin-bottom: 16px;">— reading & grammar challenge —</div>
+        <div style="background: #0f2840; border-radius: 20px; padding: 18px; text-align: left; border-left: 6px solid #f1c40f; margin-bottom: 20px; font-size: 16px; line-height: 1.6;">
+            <p style="margin: 0 0 8px;"><em>Saya</em> is a 22-year-old student stuck at <em>Nursultan Nazarbayev International Airport</em>.</p>
+            <p style="margin: 0 0 8px;">A strict immigration officer is questioning her. <strong>Wrong answers or delays</strong> make him angry, distorting the airport guide!</p>
+            <p style="margin: 0; font-size: 13px; opacity: 0.7;">⚠️ <strong>Warning:</strong> Reaching 100% anger level will result in instant deportation!</p>
+        </div>
+        <button class="start-btn" id="startBtn">✈️ Start Interview</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden">
+        <div id="readingBlock" class="reading-text">
+            <strong>📍 Airport info:</strong><br>
+            <span id="readingContent"></span>
+        </div>
+
+        <div class="timer-bar-container">
+            <div class="timer-bar" id="timerBar"></div>
+        </div>
+
+        <div class="question-box" id="questionBox">
+            <div class="question-header">
+                <div class="question-type" id="questionType">📝 GRAMMAR</div>
+                <div class="question-tracker" id="questionTracker">1 / 15</div>
+            </div>
+            <div class="question-text" id="questionText">Loading...</div>
+            <div class="difficulty-tag" id="diffTag">LEVEL 1</div>
+        </div>
+
+        <div class="anger-meter">
+            <span id="officerEmoji">😐</span>
+            <div class="anger-bar"><div class="anger-fill" id="angerFill"></div></div>
+            <span class="anger-label" id="angerLabel">0%</span>
+        </div>
+
+        <div class="options" id="optionsContainer"></div>
+
+        <div class="score-area">
+            <span>✅ <strong id="correctCount">0</strong> | ❌ <strong id="wrongCount">0</strong></span>
+            <button class="restart-btn" id="restartBtn">↺ Reset</button>
+        </div>
+
+        <div id="endScreen" class="hidden" style="text-align: center; padding: 20px 0;">
+            <h2 style="font-size: 28px;" id="endTitle">🛬 Flight Over</h2>
+            <p style="font-size: 18px;">Correct answers: <strong id="finalCorrect">0</strong> / <span id="finalTotal">0</span></p>
+            <p id="endMessage" style="font-size: 16px; opacity: 0.8;"></p>
+            <button class="restart-btn" id="restartEndBtn" style="margin-top: 14px;">↺ Try Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const rawQuestions = [
+            // Исходные вопросы
+            { type: '📝 GRAMMAR', level: 1, question: 'Saya ___ to London every summer.', options: ['go', 'goes', 'going', 'went'], correct: 1, wrongText: 'Subject-verb agreement! She goes.' },
+            { type: '📝 GRAMMAR', level: 1, question: 'The flight ___ already ___ .', options: ['has / left', 'have / left', 'is / leave', 'was / leaving'], correct: 0, wrongText: 'Present perfect: has left!' },
+            { type: '📝 GRAMMAR', level: 2, question: 'If Saya ___ her passport, she ___ the flight.', options: ['finds / will catch', 'find / catch', 'found / catch', 'will find / catches'], correct: 0, wrongText: 'First conditional: if + present, will + infinitive!' },
+            { type: '📝 GRAMMAR', level: 2, question: 'The officer asked Saya where she ___ from.', options: ['is', 'was', 'are', 'were'], correct: 1, wrongText: 'Reported speech: she was from.' },
+            { type: '📝 GRAMMAR', level: 3, question: 'By the time she arrives, the gate ___ already ___ .', options: ['will / close', 'will have / closed', 'has / closed', 'had / closed'], correct: 1, wrongText: 'Future perfect: will have closed!' },
+            { type: '📖 READING', level: 2, question: 'How many terminals does the airport have?', options: ['1', '2', '3', '4'], correct: 1, wrongText: 'Read again: two terminals!' },
+            { type: '📖 READING', level: 2, question: 'When was the airport renovated?', options: ['1969', '2017', '2005', '2020'], correct: 1, wrongText: 'It was renovated in 2017!' },
+            { type: '📖 READING', level: 3, question: 'How many passengers pass through the airport daily?', options: ['1,000', '5,000', '10,000', '50,000'], correct: 2, wrongText: 'About 10,000 passengers per day!' },
+            { type: '✈️ VOCABULARY', level: 1, question: 'What does "check-in" mean?', options: ['To board the plane', 'To register for a flight', 'To buy a ticket', 'To leave the airport'], correct: 1, wrongText: 'Check-in = register for flight!' },
+            { type: '✈️ VOCABULARY', level: 2, question: 'What is a "gate" at the airport?', options: ['The entrance to the plane', 'The ticket counter', 'The baggage claim', 'The security check'], correct: 0, wrongText: 'Gate = entrance to the plane!' },
+            
+            // 5 НОВЫХ ПРИКОЛЬНЫХ ВОПРОСОВ
+            { type: '🧳 AIRPORT SURVIVAL', level: 1, question: 'Security officer: "Is this liquid 100ml?" Saya: "No, it’s 200ml of Kazakstan tea." What happens?', options: ['He drinks it with her', 'It gets confiscated immediately', 'He gives her a discount', 'He upgrades her ticket'], correct: 1, wrongText: 'Liquids over 100ml are strictly confiscated!' },
+            { type: '📝 GRAMMAR', level: 2, question: 'Saya said: "I wish my suitcase ___ so heavy!"', options: ['isn’t', 'wasn’t', 'won’t be', 'not to be'], correct: 1, wrongText: 'Wish + past simple: I wish it wasn’t!' },
+            { type: '✈️ SLANG & IDIOMS', level: 2, question: 'The flight attendant says: "We are taking off!" What does "take off" mean?', options: ['To land on ground', 'To leave the ground and fly', 'To remove your shoes', 'To delay the plane'], correct: 1, wrongText: 'Take off = start flying into the air!' },
+            { type: '☕ FUN SCENARIO', level: 3, question: 'Saya lost her ticket! She should ask for help at the ___ desk.', options: ['Information', 'Duty-Free', 'Restroom', 'Souvenir shop'], correct: 0, wrongText: 'Always go to the Information desk for lost tickets!' },
+            { type: '📝 GRAMMAR', level: 3, question: 'Saya had better ___ her seatbelt before takeoff.', options: ['fastens', 'fasten', 'fastening', 'to fasten'], correct: 1, wrongText: 'Had better + bare infinitive (fasten)!' }
+        ];
+
+        let questions = [];
+        let currentIndex = 0, correctAnswers = 0, wrongAnswers = 0, anger = 0, answered = false;
+        let timerInterval, nextQuestionTimeout;
+        const BASE_TIME_LIMIT = 16; // Время увеличено с 12 до 16 секунд!
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'win') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(554.37, now + 0.1);
+                    osc.frequency.setValueAtTime(659.25, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (e) {}
+        }
+
+        const gameApp = document.getElementById('gameApp');
+        const storyScreen = document.getElementById('storyScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const readingContent = document.getElementById('readingContent');
+        const timerBar = document.getElementById('timerBar');
+        const questionType = document.getElementById('questionType');
+        const questionTracker = document.getElementById('questionTracker');
+        const questionText = document.getElementById('questionText');
+        const diffTag = document.getElementById('diffTag');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const angerFill = document.getElementById('angerFill');
+        const angerLabel = document.getElementById('angerLabel');
+        const officerEmoji = document.getElementById('officerEmoji');
+        const correctCount = document.getElementById('correctCount');
+        const wrongCount = document.getElementById('wrongCount');
+        const endScreen = document.getElementById('endScreen');
+
+        const originalText = `<em>Nursultan Nazarbayev International Airport</em> (TSE) is the main airport in Kazakhstan. It has <strong>two terminals</strong>: Terminal 1 for domestic flights and Terminal 2 for international flights. There are <strong>24 check-in desks</strong>, 8 gates, and a large duty-free shop. The airport <em>opened</em> in 1969 and was <em>renovated</em> in 2017. Every day, about <strong>10,000 passengers</strong> pass through the airport.`;
+
+        function shuffle(array) {
+            return array.slice().sort(() => Math.random() - 0.5);
+        }
+
+        function distortText(level) {
+            if (level < 25) return originalText;
+            
+            const doc = new DOMParser().parseFromString(originalText, 'text/html');
+            const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+
+            while (node = walk.nextNode()) {
+                let val = node.nodeValue;
+                if (level >= 25 && level < 60) {
+                    val = val.replace(/airport/gi, 'airprot').replace(/terminal/gi, 'terminl').replace(/passengers/gi, 'pasengers');
+                } else if (level >= 60) {
+                    val = val.replace(/airport/gi, 'AIRPORTT').replace(/passengers/gi, 'PASNGERS').replace(/flight/gi, 'FLYGT').toUpperCase();
+                }
+                node.nodeValue = val;
+            }
+            return doc.body.innerHTML;
+        }
+
+        function updateAngerUI() {
+            angerFill.style.width = anger + '%';
+            angerLabel.innerText = Math.round(anger) + '%';
+            readingContent.innerHTML = distortText(anger);
+
+            if (anger < 30) officerEmoji.innerText = '😐';
+            else if (anger < 65) officerEmoji.innerText = '😠';
+            else officerEmoji.innerText = '🤬';
+
+            if (anger >= 60) {
+                gameApp.classList.add('angry');
+                document.getElementById('questionBox').classList.add('angry-box');
+            } else {
+                gameApp.classList.remove('angry');
+                document.getElementById('questionBox').classList.remove('angry-box');
+            }
+
+            if (anger >= 100) {
+                clearInterval(timerInterval);
+                clearTimeout(nextQuestionTimeout);
+                setTimeout(() => {
+                    endGame(true);
+                }, 400);
+            }
+        }
+
+        function startTimer(timeLimit) {
+            clearInterval(timerInterval);
+            let timeLeft = timeLimit;
+            timerBar.style.width = '100%';
+            timerBar.style.backgroundColor = '#8ab4f8';
+
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                const pct = (timeLeft / timeLimit * 100);
+                timerBar.style.width = pct + '%';
+                
+                if (pct < 30) timerBar.style.backgroundColor = '#e74c3c';
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleAnswer(-1, null);
+                }
+            }, 100);
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= questions.length) {
+                endGame(false);
+                return;
+            }
+
+            const q = questions[currentIndex];
+            questionType.innerText = q.type;
+            questionTracker.innerText = `${currentIndex + 1} / ${questions.length}`;
+            questionText.innerText = q.question;
+            diffTag.innerText = `LEVEL ${q.level}`;
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.setAttribute('role', 'button');
+                btn.setAttribute('tabindex', '0');
+                btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                btn.addEventListener('click', () => handleAnswer(idx, btn));
+                optionsContainer.appendChild(btn);
+            });
+
+            answered = false;
+            updateAngerUI();
+            
+            // Текст для чтения получает дополнительно +4 секунды (20 секунд итого)
+            const timeLimit = q.type.includes('READING') ? BASE_TIME_LIMIT + 4 : BASE_TIME_LIMIT;
+            startTimer(timeLimit);
+        }
+
+        function handleAnswer(selected, btnElement) {
+            if (answered) return;
+            answered = true;
+            clearInterval(timerInterval);
+
+            const q = questions[currentIndex];
+            const isCorrect = (selected === q.correct);
+
+            const allBtns = optionsContainer.querySelectorAll('.option');
+            allBtns.forEach((b, i) => {
+                b.classList.add('disabled');
+                if (i === q.correct) b.classList.add('correct');
+                else if (i === selected) b.classList.add('wrong');
+            });
+
+            if (isCorrect) {
+                playSound('correct');
+                correctAnswers++;
+                correctCount.innerText = correctAnswers;
+                anger = Math.max(0, anger - 12);
+            } else {
+                playSound('wrong');
+                if (navigator.vibrate) navigator.vibrate(200);
+                wrongAnswers++;
+                wrongCount.innerText = wrongAnswers;
+                anger = Math.min(100, anger + 25);
+                gameApp.classList.add('shake');
+                setTimeout(() => gameApp.classList.remove('shake'), 400);
+                questionText.innerText = (selected === -1 ? "⏱️ Time's up! " : "") + q.wrongText;
+            }
+
+            updateAngerUI();
+
+            if (anger < 100) {
+                // Время ожидания переходного окна увеличено: 1.2 с для верного и 2.2 с для неверного
+                nextQuestionTimeout = setTimeout(() => {
+                    currentIndex++;
+                    renderQuestion();
+                }, isCorrect ? 1200 : 2200);
+            }
+        }
+
+        function endGame(isDeported = false) {
+            clearInterval(timerInterval);
+            endScreen.classList.remove('hidden');
+            document.getElementById('finalCorrect').innerText = correctAnswers;
+            document.getElementById('finalTotal').innerText = questions.length;
+            
+            const endTitle = document.getElementById('endTitle');
+            const endMessage = document.getElementById('endMessage');
+
+            if (isDeported) {
+                playSound('wrong');
+                endTitle.innerText = '🚨 DEPORTED!';
+                endMessage.innerText = 'The officer lost all patience and revoked Saya’s entry visa!';
+            } else {
+                const isWin = correctAnswers >= Math.ceil(questions.length * 0.7);
+                if (isWin) playSound('win');
+                endTitle.innerText = '🛬 Flight Over';
+                endMessage.innerText = isWin
+                    ? '🌟 Great job! Saya made her flight safely.' 
+                    : '💀 Saya missed her flight due to too many errors.';
+            }
+        }
+
+        function resetAll() {
+            clearInterval(timerInterval);
+            clearTimeout(nextQuestionTimeout);
+            questions = shuffle(rawQuestions);
+            currentIndex = 0; correctAnswers = 0; wrongAnswers = 0; anger = 0;
+            correctCount.innerText = '0'; wrongCount.innerText = '0';
+            endScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (gameScreen.classList.contains('hidden') || answered) return;
+            const key = e.key.toUpperCase();
+            const keyMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
+            
+            if (keyMap.hasOwnProperty(key)) {
+                const index = keyMap[key];
+                const btns = optionsContainer.querySelectorAll('.option');
+                if (btns[index]) handleAnswer(index, btns[index]);
+            }
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            storyScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resetAll();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', resetAll);
+        document.getElementById('restartEndBtn').addEventListener('click', resetAll);
+    })();
+</script>
+</body>
+</html>
