@@ -1,606 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Saya's Airport - Reading & Grammar</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            user-select: none;
-        }
-        body {
-            background: linear-gradient(145deg, #0b1a2e, #1a2f44);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 16px;
-        }
-        .game {
-            max-width: 720px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 24px 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #f0f6fe;
-            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
-        }
-        .game.angry {
-            background: rgba(180, 30, 30, 0.25);
-            border-color: #e74c3c;
-            box-shadow: 0 0 40px rgba(231, 76, 60, 0.4);
-        }
-        .shake {
-            animation: shake 0.4s ease-in-out;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-        .airport {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: #8ab4f8;
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed rgba(255,255,255,0.15);
-            padding-bottom: 10px;
-            margin-bottom: 16px;
-        }
-        .saya {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(29, 53, 87, 0.8);
-            padding: 6px 16px 6px 10px;
-            border-radius: 40px;
-            width: fit-content;
-            margin-bottom: 16px;
-            font-weight: 500;
-        }
-        .saya span {
-            background: #f1c40f;
-            color: #0b1a2e;
-            font-weight: 700;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        .timer-bar-container {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
-        }
-        .timer-bar {
-            height: 100%;
-            width: 100%;
-            background: #8ab4f8;
-            transition: width 0.1s linear, background-color 0.3s;
-        }
-        .question-box {
-            background: #0f2840;
-            border-radius: 20px;
-            padding: 18px;
-            margin: 12px 0 16px;
-            border-left: 6px solid #4a7db5;
-            transition: 0.25s;
-            min-height: 90px;
-        }
-        .question-box.angry-box {
-            background: #2a0f0f;
-            border-left-color: #e74c3c;
-        }
-        .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .question-text {
-            font-size: 19px;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-        .question-type {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8ab4f8;
-            font-weight: 700;
-        }
-        .question-tracker {
-            font-size: 12px;
-            opacity: 0.7;
-            font-weight: 600;
-        }
-        .reading-text {
-            background: #0a1f33;
-            border-radius: 16px;
-            padding: 14px 16px;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 16px;
-            border: 1px solid #2a4a6a;
-            transition: 0.3s;
-        }
-        .reading-text em { color: #f1c40f; font-style: normal; }
-        .anger-meter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 8px 0 14px;
-        }
-        .anger-bar {
-            flex: 1;
-            height: 12px;
-            background: #2a3f55;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid #3a5a7a;
-        }
-        .anger-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4cd137, #f1c40f, #e67e22, #e74c3c);
-            border-radius: 20px;
-            transition: width 0.4s ease;
-        }
-        .anger-label {
-            font-size: 15px;
-            font-weight: 700;
-            min-width: 50px;
-            text-align: right;
-            color: #ffb07c;
-        }
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 16px 0;
-        }
-        .option {
-            background: #1d3a57;
-            border: 2px solid #2f5177;
-            border-radius: 40px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #eef6ff;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-align: left;
-            outline: none;
-        }
-        .option:hover, .option:focus {
-            background: #2a4d73;
-            border-color: #6a9ddb;
-            transform: translateY(-1px);
-        }
-        .option:active {
-            transform: translateY(1px);
-        }
-        .option.correct { background: #1e7e34 !important; border-color: #4cd137 !important; }
-        .option.wrong { background: #7e2a2a !important; border-color: #e74c3c !important; }
-        .option.disabled { pointer-events: none; }
-        
-        .score-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #2e4a66;
-            padding-top: 14px;
-            font-size: 15px;
-        }
-        .restart-btn, .start-btn {
-            background: #e67e22;
-            border: none;
-            color: #0b1a2e;
-            font-weight: 700;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
-        }
-        .restart-btn:hover, .start-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
-        .start-btn {
-            background: #4cd137;
-            font-size: 20px;
-            padding: 14px 40px;
-            box-shadow: 0 4px 15px rgba(76, 209, 55, 0.4);
-        }
-        .hidden { display: none !important; }
-        .difficulty-tag {
-            background: #f39c12;
-            color: #0b1a2e;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 8px;
-        }
-
-        /* Mobile adaptation */
-        @media (max-width: 480px) {
-            body { padding: 8px; }
-            .game { border-radius: 20px; padding: 16px 12px; }
-            .question-text { font-size: 16px; }
-            .option { padding: 10px 16px; font-size: 14px; }
-        }
-    </style>
-</head>
-<body>
-<div class="game" id="gameApp">
-    <div class="airport">
-        <span>✈️ TERMINAL 4</span>
-        <span>🆘 SAYA</span>
-    </div>
-    <div class="saya">
-        <span>👩</span> Saya · stuck at airport
-    </div>
-
-    <!-- STORY SCREEN -->
-    <div id="storyScreen" style="text-align: center; padding: 10px;">
-        <h1 style="font-size: 28px; margin-bottom: 4px;">🛫 Lost in Transit</h1>
-        <div style="font-size: 15px; opacity: 0.8; margin-bottom: 16px;">— reading & grammar challenge —</div>
-        <div style="background: #0f2840; border-radius: 20px; padding: 18px; text-align: left; border-left: 6px solid #f1c40f; margin-bottom: 20px; font-size: 16px; line-height: 1.6;">
-            <p style="margin: 0 0 8px;"><em>Saya</em> is a 22-year-old student stuck at <em>Nursultan Nazarbayev International Airport</em>.</p>
-            <p style="margin: 0 0 8px;">A strict immigration officer is questioning her. <strong>Wrong answers or delays</strong> make him angry, distorting the airport guide!</p>
-            <p style="margin: 0; font-size: 13px; opacity: 0.7;">⚠️ <strong>Warning:</strong> Reaching 100% anger level will result in instant deportation!</p>
-        </div>
-        <button class="start-btn" id="startBtn">✈️ Start Interview</button>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="gameScreen" class="hidden">
-        <div id="readingBlock" class="reading-text">
-            <strong>📍 Airport info:</strong><br>
-            <span id="readingContent"></span>
-        </div>
-
-        <div class="timer-bar-container">
-            <div class="timer-bar" id="timerBar"></div>
-        </div>
-
-        <div class="question-box" id="questionBox">
-            <div class="question-header">
-                <div class="question-type" id="questionType">📝 GRAMMAR</div>
-                <div class="question-tracker" id="questionTracker">1 / 15</div>
-            </div>
-            <div class="question-text" id="questionText">Loading...</div>
-            <div class="difficulty-tag" id="diffTag">LEVEL 1</div>
-        </div>
-
-        <div class="anger-meter">
-            <span id="officerEmoji">😐</span>
-            <div class="anger-bar"><div class="anger-fill" id="angerFill"></div></div>
-            <span class="anger-label" id="angerLabel">0%</span>
-        </div>
-
-        <div class="options" id="optionsContainer"></div>
-
-        <div class="score-area">
-            <span>✅ <strong id="correctCount">0</strong> | ❌ <strong id="wrongCount">0</strong></span>
-            <button class="restart-btn" id="restartBtn">↺ Reset</button>
-        </div>
-
-        <div id="endScreen" class="hidden" style="text-align: center; padding: 20px 0;">
-            <h2 style="font-size: 28px;" id="endTitle">🛬 Flight Over</h2>
-            <p style="font-size: 18px;">Correct answers: <strong id="finalCorrect">0</strong> / <span id="finalTotal">0</span></p>
-            <p id="endMessage" style="font-size: 16px; opacity: 0.8;"></p>
-            <button class="restart-btn" id="restartEndBtn" style="margin-top: 14px;">↺ Try Again</button>
-        </div>
-    </div>
-</div>
-
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lost in Transit: Saya's Airport English Game</title>
+<style>
+*{box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+:root{--bg:#0b1020;--card:rgba(30,36,70,.72);--line:rgba(196,181,253,.25);--pu:#a78bfa;--lav:#c4b5fd;--gold:#fcd34d;--tx:#eef2ff;--mu:#9aa6c8;--red:#ef4444;--gr:#22c55e}
+body{margin:0;background:radial-gradient(circle at 15% 8%,#35245f,transparent 34%),radial-gradient(circle at 90% 90%,#163d57,transparent 35%),var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(11,16,32,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer;margin-right:auto}.brand i{font-style:normal;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pu),#38bdf8);display:grid;place-items:center;font-size:19px}
+.brand b{display:block;font-size:16px;letter-spacing:.5px}.brand small{color:var(--lav);font-size:10px;letter-spacing:2px;text-transform:uppercase}
+nav{display:flex;gap:4px}nav button,#snd{background:none;border:0;color:var(--mu);padding:8px 13px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+nav button:hover,#snd:hover{background:rgba(255,255,255,.08);color:#fff}nav button.on{background:rgba(167,139,250,.2);color:#fff}
+main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:22px 16px}
+.tab{display:none;animation:in .35s}.tab.on{display:block}@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+h1,h2{margin:0 0 8px}h2{font-size:28px}.sub{color:var(--mu);margin:0 0 20px}
+.hero{position:relative;overflow:hidden;text-align:center;padding:56px 20px;min-height:360px}
+#cv{position:absolute;inset:0;width:100%;height:100%}.hero>*:not(canvas){position:relative}
+.hero h1{font-size:clamp(34px,7vw,60px);line-height:1.1}.hero h1 span{background:linear-gradient(90deg,var(--lav),#38bdf8,var(--gold));-webkit-background-clip:text;color:transparent}
+.pill{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid rgba(252,211,77,.4);color:var(--gold);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.hero p{max-width:600px;margin:0 auto 24px;color:#cbd5e1;font-size:18px;line-height:1.5}
+.btn{background:var(--lav);color:#17152a;border:0;font-weight:700;font-size:16px;padding:13px 30px;border-radius:14px;cursor:pointer;margin:4px;transition:.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(167,139,250,.35)}.btn.alt{background:var(--gold)}.btn.ghost{background:transparent;color:#fff;border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.stat{text-align:center;padding:18px}.stat b{display:block;font-size:34px;color:var(--gold)}.stat span{color:var(--mu);font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}.steps .card{padding:18px}.steps h3{margin:6px 0;font-size:17px}.steps p{margin:0;color:var(--mu);font-size:14px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.chip{padding:9px 16px;border-radius:99px;background:#222947;border:2px solid #3b456d;color:#fff;font-weight:600;cursor:pointer;font-size:14px}.chip.on{border-color:var(--pu);background:#3b3470}
+.airport{display:flex;justify-content:space-between;color:var(--lav);font-size:12px;font-weight:700;letter-spacing:1.5px;border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:14px}
+.game.angry{background:rgba(150,30,30,.28);border-color:var(--red);box-shadow:0 0 40px rgba(239,68,68,.35)}.shake{animation:sh .4s}@keyframes sh{0%,100%{transform:none}25%,75%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+.reading{background:#111a31;border:1px solid #303b60;border-radius:14px;padding:14px 16px;font-size:15px;line-height:1.6;margin-bottom:14px}.reading em{color:var(--gold);font-style:normal}
+.tbar{height:6px;background:rgba(255,255,255,.1);border-radius:9px;overflow:hidden;margin-bottom:12px}#tb{height:100%;width:100%;background:var(--pu)}
+.qbox{background:#171d37;border-left:6px solid var(--pu);border-radius:16px;padding:16px;min-height:96px}.qbox.ang{background:#2a0f0f;border-left-color:var(--red)}
+.qh{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--lav);margin-bottom:6px;text-transform:uppercase}#qt{font-size:19px;line-height:1.4}
+.lv{display:inline-block;margin-top:8px;background:#f59e0b;color:#0b1020;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px}
+.anger{display:flex;align-items:center;gap:10px;margin:12px 0}.ab{flex:1;height:12px;background:#252b45;border-radius:20px;overflow:hidden;border:1px solid #424969}#af{height:100%;width:0;background:linear-gradient(90deg,#4ade80,#fcd34d,#fb923c,#ef4444);transition:width .4s}#al{min-width:46px;text-align:right;color:#fca5a5;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:10px;margin:14px 0}.opt{background:#222947;border:2px solid #3b456d;border-radius:14px;padding:14px 17px;font-size:16px;cursor:pointer;transition:.15s}
+.opt:hover{background:#30385f;border-color:var(--pu);transform:translateY(-1px)}.opt.ok{background:#166534!important;border-color:var(--gr)!important}.opt.no{background:#7f1d1d!important;border-color:var(--red)!important}.opt.off{pointer-events:none}
+.foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #2e4a66;padding-top:12px}
+.hid{display:none!important}.end{text-align:center;padding:10px 0}.end h2{font-size:30px}
+.wg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.fc{height:140px;perspective:800px;cursor:pointer}.fi{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}.fc.f .fi{transform:rotateY(180deg)}
+.fa,.fb{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;background:var(--card)}
+.fa b{font-size:20px}.fa small{color:var(--mu);margin-top:6px}.fb{transform:rotateY(180deg);background:#2b2560;font-size:14px;line-height:1.4}.fb i{color:var(--gold);margin-top:6px;font-size:13px}
+.cert{margin-top:16px;text-align:center;border:3px double var(--gold);border-radius:18px;padding:28px;background:#171335}.cert h2{color:var(--gold);font-size:32px}.cert .nm{font-size:30px;margin:10px 0;border-bottom:1px solid var(--line);display:inline-block;padding:0 24px}
+input{background:#1a2040;border:1px solid var(--line);color:#fff;border-radius:12px;padding:12px 14px;font-size:16px;min-width:200px}
+footer{text-align:center;padding:20px;color:var(--mu);font-size:13px;border-top:1px solid var(--line)}
+@media(max-width:700px){nav{display:none;position:absolute;top:60px;left:0;right:0;flex-direction:column;background:#0b1020;padding:8px}nav.show{display:flex}#menu{display:block!important}}
+#menu{display:none;background:none;border:0;color:#fff;font-size:22px}
+@media print{body *{visibility:hidden}.cert,.cert *{visibility:visible}.cert{position:fixed;inset:20px}}
+.mini{background:#222947;border:1px solid var(--line);color:#fff;border-radius:10px;padding:4px 9px;cursor:pointer;margin:6px 3px 0;font-size:14px}
+.tt{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--gold);color:#17152a;padding:10px 18px;border-radius:14px;font-weight:700;z-index:99}
+table.lb{width:100%;border-collapse:collapse}table.lb td,table.lb th{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+.bd{display:inline-block;padding:6px 12px;margin:4px;border-radius:99px;background:#222947;border:1px solid var(--line);font-size:13px}.bd.lock{opacity:.35}
+.mis{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}.mis b{color:var(--gold)}
+</style></head><body>
+<header class="top"><div class="brand" data-tab="home"><i>✈️</i><div><b>Lost in Transit</b><small>Airport English game</small></div></div>
+<nav id="nav"><button data-tab="home" class="on">Home</button><button data-tab="play">Play</button><button data-tab="words">Word bank</button><button data-tab="results">Results</button></nav>
+<button id="snd" title="Sound">🔊</button><button id="menu">☰</button></header>
+<main>
+<section id="home" class="tab on">
+ <div class="card hero"><canvas id="cv"></canvas><div class="pill">Research project · 9th grade</div>
+ <h1>Lost in <span>Transit</span></h1>
+ <p>Saya is stuck at the airport. Answer grammar, reading and vocabulary questions before the officer loses his patience!</p>
+ <button class="btn" data-tab="play">▶ Start the game</button><button class="btn ghost" data-tab="words">📚 Word bank</button></div>
+ <div class="stats"><div class="card stat"><b id="sQ">0</b><span>questions</span></div><div class="card stat"><b>3</b><span>topics</span></div><div class="card stat"><b>3</b><span>levels</span></div><div class="card stat"><b id="sW">0</b><span>airport words</span></div></div>
+ <div class="steps"><div class="card"><div style="font-size:28px">🎯</div><h3>Answer fast</h3><p>Every question has a timer. Reading questions get extra time.</p></div>
+ <div class="card"><div style="font-size:28px">😠</div><h3>Watch the officer</h3><p>A wrong answer adds 25% anger. At 100% Saya is deported.</p></div>
+ <div class="card"><div style="font-size:28px">🌀</div><h3>Text gets distorted</h3><p>The angrier he is, the harder the airport guide is to read.</p></div>
+ <div class="card"><div style="font-size:28px">🏅</div><h3>Get a certificate</h3><p>Score 70% or more and print your own certificate.</p></div></div>
+</section>
+<section id="play" class="tab"><div class="card game" id="app">
+ <div class="airport"><span>✈️ TERMINAL 2</span><span>🆘 SAYA</span></div>
+ <div id="pick"><h2>🛫 Choose a topic</h2><p class="sub">Saya is a 22-year-old student at Nursultan Nazarbayev International Airport. A strict officer is questioning her.</p>
+  <div class="chips" id="chips"><div class="chip on" data-m="all">🎲 Mixed (15)</div><div class="chip" data-m="g">📝 Grammar</div><div class="chip" data-m="r">📖 Reading</div><div class="chip" data-m="v">✈️ Vocabulary</div><div class="chip" data-m="l">🎧 Listening</div><div class="chip" data-m="w">🧠 My weak topics</div><div class="chip" data-m="t">📊 Test (before / after)</div></div>
+  <p><input id="pn" placeholder="Your name"></p>
+  <button class="btn" id="go">✈️ Start interview</button></div>
+ <div id="gm" class="hid">
+  <div class="reading"><strong>📍 Airport info:</strong><br><span id="rd"></span></div>
+  <div class="tbar"><div id="tb"></div></div>
+  <div class="qbox" id="qb"><div class="qh"><span id="qy">GRAMMAR</span><span id="qn">1 / 15</span></div><div id="qt"></div><span class="lv" id="lv">LEVEL 1</span> <button class="mini" id="sp">🔊 Listen</button><button class="mini" id="hn">💡 50/50 (−5⭐)</button></div>
+  <div class="anger"><span id="em" style="font-size:24px">😐</span><div class="ab"><div id="af"></div></div><span id="al">0%</span></div>
+  <div class="opts" id="op"></div>
+  <div class="foot"><span>✅ <b id="c1">0</b> &nbsp;❌ <b id="c2">0</b> &nbsp;⭐ <b id="pt">0</b></span><button class="btn alt" id="rs" style="padding:8px 18px;font-size:14px">↺ Menu</button></div>
+  <div class="end hid" id="en"><h2 id="et"></h2><p style="font-size:18px">Correct: <b id="fc"></b> / <span id="ft"></span></p><p id="emsg" style="color:var(--mu)"></p>
+   <button class="btn" id="again">↺ Try again</button><button class="btn ghost" data-tab="results">🏅 Results</button></div>
+ </div></div></section>
+<section id="words" class="tab"><h2>📚 Airport word bank</h2><p class="sub">Tap a card to see the meaning and an example.</p><div class="wg" id="wg"></div></section>
+<section id="results" class="tab"><h2>🏅 Your results</h2><p class="sub">Saved on this device.</p>
+ <div class="stats"><div class="card stat"><b id="rG">0</b><span>games played</span></div><div class="card stat"><b id="rB">0%</b><span>best score</span></div><div class="card stat"><b id="rA">0%</b><span>accuracy</span></div></div>
+ <div class="card" style="margin-top:16px"><h3 style="margin-top:0">📊 Before / After test</h3><p id="ba" class="sub"></p></div>
+ <div class="card" style="margin-top:16px"><h3 style="margin-top:0">🏆 Achievements</h3><div id="bg"></div></div>
+ <div class="card" style="margin-top:16px"><h3 style="margin-top:0">🥇 Leaderboard (this device)</h3><div id="lbx"></div></div>
+ <div class="card" style="margin-top:16px"><h3 style="margin-top:0">❌ My mistakes</h3><div id="mx"></div><button class="btn ghost" id="clr">Clear mistakes</button></div>
+ <div class="card" style="margin-top:16px;text-align:center"><h3 style="margin-top:0">🎓 Certificate</h3><p class="sub" id="cm">Finish a game with 70% or more to unlock it.</p>
+  <input id="nm" placeholder="Your name" class="hid"> <button class="btn alt hid" id="cb">Show certificate</button>
+  <div class="cert hid" id="ct"><div style="font-size:42px">✈️</div><h2>Certificate of Success</h2><div>Saya made her flight thanks to</div><div class="nm" id="cn"></div><div>Score: <b id="cs"></b></div><button class="btn ghost" onclick="print()" style="margin-top:14px">🖨 Print</button></div></div>
+</section>
+</main>
+<footer>Research project «Can computer games using AI help in learning English?» · Dulatuly Ilyas, 9th grade, M. Auezov secondary school</footer>
 <script>
-    (function() {
-        const rawQuestions = [
-            // Исходные вопросы
-            { type: '📝 GRAMMAR', level: 1, question: 'Saya ___ to London every summer.', options: ['go', 'goes', 'going', 'went'], correct: 1, wrongText: 'Subject-verb agreement! She goes.' },
-            { type: '📝 GRAMMAR', level: 1, question: 'The flight ___ already ___ .', options: ['has / left', 'have / left', 'is / leave', 'was / leaving'], correct: 0, wrongText: 'Present perfect: has left!' },
-            { type: '📝 GRAMMAR', level: 2, question: 'If Saya ___ her passport, she ___ the flight.', options: ['finds / will catch', 'find / catch', 'found / catch', 'will find / catches'], correct: 0, wrongText: 'First conditional: if + present, will + infinitive!' },
-            { type: '📝 GRAMMAR', level: 2, question: 'The officer asked Saya where she ___ from.', options: ['is', 'was', 'are', 'were'], correct: 1, wrongText: 'Reported speech: she was from.' },
-            { type: '📝 GRAMMAR', level: 3, question: 'By the time she arrives, the gate ___ already ___ .', options: ['will / close', 'will have / closed', 'has / closed', 'had / closed'], correct: 1, wrongText: 'Future perfect: will have closed!' },
-            { type: '📖 READING', level: 2, question: 'How many terminals does the airport have?', options: ['1', '2', '3', '4'], correct: 1, wrongText: 'Read again: two terminals!' },
-            { type: '📖 READING', level: 2, question: 'When was the airport renovated?', options: ['1969', '2017', '2005', '2020'], correct: 1, wrongText: 'It was renovated in 2017!' },
-            { type: '📖 READING', level: 3, question: 'How many passengers pass through the airport daily?', options: ['1,000', '5,000', '10,000', '50,000'], correct: 2, wrongText: 'About 10,000 passengers per day!' },
-            { type: '✈️ VOCABULARY', level: 1, question: 'What does "check-in" mean?', options: ['To board the plane', 'To register for a flight', 'To buy a ticket', 'To leave the airport'], correct: 1, wrongText: 'Check-in = register for flight!' },
-            { type: '✈️ VOCABULARY', level: 2, question: 'What is a "gate" at the airport?', options: ['The entrance to the plane', 'The ticket counter', 'The baggage claim', 'The security check'], correct: 0, wrongText: 'Gate = entrance to the plane!' },
-            
-            // 5 НОВЫХ ПРИКОЛЬНЫХ ВОПРОСОВ
-            { type: '🧳 AIRPORT SURVIVAL', level: 1, question: 'Security officer: "Is this liquid 100ml?" Saya: "No, it’s 200ml of Kazakstan tea." What happens?', options: ['He drinks it with her', 'It gets confiscated immediately', 'He gives her a discount', 'He upgrades her ticket'], correct: 1, wrongText: 'Liquids over 100ml are strictly confiscated!' },
-            { type: '📝 GRAMMAR', level: 2, question: 'Saya said: "I wish my suitcase ___ so heavy!"', options: ['isn’t', 'wasn’t', 'won’t be', 'not to be'], correct: 1, wrongText: 'Wish + past simple: I wish it wasn’t!' },
-            { type: '✈️ SLANG & IDIOMS', level: 2, question: 'The flight attendant says: "We are taking off!" What does "take off" mean?', options: ['To land on ground', 'To leave the ground and fly', 'To remove your shoes', 'To delay the plane'], correct: 1, wrongText: 'Take off = start flying into the air!' },
-            { type: '☕ FUN SCENARIO', level: 3, question: 'Saya lost her ticket! She should ask for help at the ___ desk.', options: ['Information', 'Duty-Free', 'Restroom', 'Souvenir shop'], correct: 0, wrongText: 'Always go to the Information desk for lost tickets!' },
-            { type: '📝 GRAMMAR', level: 3, question: 'Saya had better ___ her seatbelt before takeoff.', options: ['fastens', 'fasten', 'fastening', 'to fasten'], correct: 1, wrongText: 'Had better + bare infinitive (fasten)!' }
-        ];
-
-        let questions = [];
-        let currentIndex = 0, correctAnswers = 0, wrongAnswers = 0, anger = 0, answered = false;
-        let timerInterval, nextQuestionTimeout;
-        const BASE_TIME_LIMIT = 16; // Время увеличено с 12 до 16 секунд!
-
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        let audioCtx;
-
-        function playSound(type) {
-            try {
-                if (!audioCtx) audioCtx = new AudioCtx();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                const now = audioCtx.currentTime;
-
-                if (type === 'correct') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
-                } else if (type === 'win') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.setValueAtTime(554.37, now + 0.1);
-                    osc.frequency.setValueAtTime(659.25, now + 0.2);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-                    osc.start(now);
-                    osc.stop(now + 0.5);
-                }
-            } catch (e) {}
-        }
-
-        const gameApp = document.getElementById('gameApp');
-        const storyScreen = document.getElementById('storyScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const readingContent = document.getElementById('readingContent');
-        const timerBar = document.getElementById('timerBar');
-        const questionType = document.getElementById('questionType');
-        const questionTracker = document.getElementById('questionTracker');
-        const questionText = document.getElementById('questionText');
-        const diffTag = document.getElementById('diffTag');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const angerFill = document.getElementById('angerFill');
-        const angerLabel = document.getElementById('angerLabel');
-        const officerEmoji = document.getElementById('officerEmoji');
-        const correctCount = document.getElementById('correctCount');
-        const wrongCount = document.getElementById('wrongCount');
-        const endScreen = document.getElementById('endScreen');
-
-        const originalText = `<em>Nursultan Nazarbayev International Airport</em> (TSE) is the main airport in Kazakhstan. It has <strong>two terminals</strong>: Terminal 1 for domestic flights and Terminal 2 for international flights. There are <strong>24 check-in desks</strong>, 8 gates, and a large duty-free shop. The airport <em>opened</em> in 1969 and was <em>renovated</em> in 2017. Every day, about <strong>10,000 passengers</strong> pass through the airport.`;
-
-        function shuffle(array) {
-            return array.slice().sort(() => Math.random() - 0.5);
-        }
-
-        function distortText(level) {
-            if (level < 25) return originalText;
-            
-            const doc = new DOMParser().parseFromString(originalText, 'text/html');
-            const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
-            let node;
-
-            while (node = walk.nextNode()) {
-                let val = node.nodeValue;
-                if (level >= 25 && level < 60) {
-                    val = val.replace(/airport/gi, 'airprot').replace(/terminal/gi, 'terminl').replace(/passengers/gi, 'pasengers');
-                } else if (level >= 60) {
-                    val = val.replace(/airport/gi, 'AIRPORTT').replace(/passengers/gi, 'PASNGERS').replace(/flight/gi, 'FLYGT').toUpperCase();
-                }
-                node.nodeValue = val;
-            }
-            return doc.body.innerHTML;
-        }
-
-        function updateAngerUI() {
-            angerFill.style.width = anger + '%';
-            angerLabel.innerText = Math.round(anger) + '%';
-            readingContent.innerHTML = distortText(anger);
-
-            if (anger < 30) officerEmoji.innerText = '😐';
-            else if (anger < 65) officerEmoji.innerText = '😠';
-            else officerEmoji.innerText = '🤬';
-
-            if (anger >= 60) {
-                gameApp.classList.add('angry');
-                document.getElementById('questionBox').classList.add('angry-box');
-            } else {
-                gameApp.classList.remove('angry');
-                document.getElementById('questionBox').classList.remove('angry-box');
-            }
-
-            if (anger >= 100) {
-                clearInterval(timerInterval);
-                clearTimeout(nextQuestionTimeout);
-                setTimeout(() => {
-                    endGame(true);
-                }, 400);
-            }
-        }
-
-        function startTimer(timeLimit) {
-            clearInterval(timerInterval);
-            let timeLeft = timeLimit;
-            timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#8ab4f8';
-
-            timerInterval = setInterval(() => {
-                timeLeft -= 0.1;
-                const pct = (timeLeft / timeLimit * 100);
-                timerBar.style.width = pct + '%';
-                
-                if (pct < 30) timerBar.style.backgroundColor = '#e74c3c';
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    handleAnswer(-1, null);
-                }
-            }, 100);
-        }
-
-        function renderQuestion() {
-            if (currentIndex >= questions.length) {
-                endGame(false);
-                return;
-            }
-
-            const q = questions[currentIndex];
-            questionType.innerText = q.type;
-            questionTracker.innerText = `${currentIndex + 1} / ${questions.length}`;
-            questionText.innerText = q.question;
-            diffTag.innerText = `LEVEL ${q.level}`;
-            optionsContainer.innerHTML = '';
-
-            q.options.forEach((opt, idx) => {
-                const btn = document.createElement('div');
-                btn.className = 'option';
-                btn.setAttribute('role', 'button');
-                btn.setAttribute('tabindex', '0');
-                btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
-                btn.addEventListener('click', () => handleAnswer(idx, btn));
-                optionsContainer.appendChild(btn);
-            });
-
-            answered = false;
-            updateAngerUI();
-            
-            // Текст для чтения получает дополнительно +4 секунды (20 секунд итого)
-            const timeLimit = q.type.includes('READING') ? BASE_TIME_LIMIT + 4 : BASE_TIME_LIMIT;
-            startTimer(timeLimit);
-        }
-
-        function handleAnswer(selected, btnElement) {
-            if (answered) return;
-            answered = true;
-            clearInterval(timerInterval);
-
-            const q = questions[currentIndex];
-            const isCorrect = (selected === q.correct);
-
-            const allBtns = optionsContainer.querySelectorAll('.option');
-            allBtns.forEach((b, i) => {
-                b.classList.add('disabled');
-                if (i === q.correct) b.classList.add('correct');
-                else if (i === selected) b.classList.add('wrong');
-            });
-
-            if (isCorrect) {
-                playSound('correct');
-                correctAnswers++;
-                correctCount.innerText = correctAnswers;
-                anger = Math.max(0, anger - 12);
-            } else {
-                playSound('wrong');
-                if (navigator.vibrate) navigator.vibrate(200);
-                wrongAnswers++;
-                wrongCount.innerText = wrongAnswers;
-                anger = Math.min(100, anger + 25);
-                gameApp.classList.add('shake');
-                setTimeout(() => gameApp.classList.remove('shake'), 400);
-                questionText.innerText = (selected === -1 ? "⏱️ Time's up! " : "") + q.wrongText;
-            }
-
-            updateAngerUI();
-
-            if (anger < 100) {
-                // Время ожидания переходного окна увеличено: 1.2 с для верного и 2.2 с для неверного
-                nextQuestionTimeout = setTimeout(() => {
-                    currentIndex++;
-                    renderQuestion();
-                }, isCorrect ? 1200 : 2200);
-            }
-        }
-
-        function endGame(isDeported = false) {
-            clearInterval(timerInterval);
-            endScreen.classList.remove('hidden');
-            document.getElementById('finalCorrect').innerText = correctAnswers;
-            document.getElementById('finalTotal').innerText = questions.length;
-            
-            const endTitle = document.getElementById('endTitle');
-            const endMessage = document.getElementById('endMessage');
-
-            if (isDeported) {
-                playSound('wrong');
-                endTitle.innerText = '🚨 DEPORTED!';
-                endMessage.innerText = 'The officer lost all patience and revoked Saya’s entry visa!';
-            } else {
-                const isWin = correctAnswers >= Math.ceil(questions.length * 0.7);
-                if (isWin) playSound('win');
-                endTitle.innerText = '🛬 Flight Over';
-                endMessage.innerText = isWin
-                    ? '🌟 Great job! Saya made her flight safely.' 
-                    : '💀 Saya missed her flight due to too many errors.';
-            }
-        }
-
-        function resetAll() {
-            clearInterval(timerInterval);
-            clearTimeout(nextQuestionTimeout);
-            questions = shuffle(rawQuestions);
-            currentIndex = 0; correctAnswers = 0; wrongAnswers = 0; anger = 0;
-            correctCount.innerText = '0'; wrongCount.innerText = '0';
-            endScreen.classList.add('hidden');
-            renderQuestion();
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (gameScreen.classList.contains('hidden') || answered) return;
-            const key = e.key.toUpperCase();
-            const keyMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
-            
-            if (keyMap.hasOwnProperty(key)) {
-                const index = keyMap[key];
-                const btns = optionsContainer.querySelectorAll('.option');
-                if (btns[index]) handleAnswer(index, btns[index]);
-            }
-        });
-
-        document.getElementById('startBtn').addEventListener('click', () => {
-            storyScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            resetAll();
-        });
-
-        document.getElementById('restartBtn').addEventListener('click', resetAll);
-        document.getElementById('restartEndBtn').addEventListener('click', resetAll);
-    })();
-</script>
-</body>
-</html>
+(()=>{
+const $=id=>document.getElementById(id);
+// [topic, level, question, options, correct, tip]
+const Q=[
+['g',1,'Saya ___ to London every summer.',['go','goes','going','went'],1,'Subject-verb agreement: Saya goes.'],
+['g',1,'The flight ___ already ___ .',['has / left','have / left','is / leave','was / leaving'],0,'Present perfect: has left!'],
+['g',1,'Passengers ___ their passports at the desk.',['show','shows','showing','shown'],0,'Plural subject: passengers show.'],
+['g',1,'There ___ two bags on the belt.',['is','are','be','was'],1,'Plural: there are two bags.'],
+['g',2,'If Saya ___ her passport, she ___ the flight.',['finds / will catch','find / catch','found / catch','will find / catches'],0,'First conditional: if + present, will + infinitive!'],
+['g',2,'The officer asked Saya where she ___ from.',['is','was','are','were'],1,'Reported speech: she was from.'],
+['g',2,'Saya said: "I wish my suitcase ___ so heavy!"',['isn’t','wasn’t','won’t be','not to be'],1,'Wish + past simple: I wish it wasn’t!'],
+['g',2,'Saya has been waiting here ___ three hours.',['since','for','during','from'],1,'for + period of time: for three hours.'],
+['g',2,'The plane was ___ by bad weather.',['delayed','delaying','delay','delays'],0,'Passive voice: was delayed.'],
+['g',3,'By the time she arrives, the gate ___ already ___ .',['will / close','will have / closed','has / closed','had / closed'],1,'Future perfect: will have closed!'],
+['g',3,'Saya had better ___ her seatbelt before takeoff.',['fastens','fasten','fastening','to fasten'],1,'Had better + bare infinitive: fasten.'],
+['g',3,'If she had left earlier, she ___ the gate on time.',['would reach','would have reached','will reach','reached'],1,'Third conditional: would have + past participle.'],
+['r',1,'Which terminal is for international flights?',['Terminal 1','Terminal 2','Terminal 3','Terminal 4'],1,'Terminal 2 is for international flights.'],
+['r',2,'How many terminals does the airport have?',['1','2','3','4'],1,'Read again: two terminals!'],
+['r',2,'When was the airport renovated?',['1969','2017','2005','2020'],1,'It was renovated in 2017!'],
+['r',2,'How many check-in desks does the airport have?',['8','12','24','50'],2,'There are 24 check-in desks.'],
+['r',2,'How many gates are there?',['4','8','12','24'],1,'There are 8 gates.'],
+['r',3,'How many passengers pass through the airport daily?',['1,000','5,000','10,000','50,000'],2,'About 10,000 passengers per day!'],
+['v',1,'What does "check-in" mean?',['To board the plane','To register for a flight','To buy a ticket','To leave the airport'],1,'Check-in = register for the flight!'],
+['v',1,'A "boarding pass" is a document that lets you…',['enter the plane','rent a car','skip customs','change money'],0,'Boarding pass = permission to board.'],
+['v',1,'Officer: "Is this liquid 100 ml?" Saya: "No, 200 ml of tea." What happens?',['He drinks it with her','It gets confiscated','He gives her a discount','He upgrades her ticket'],1,'Liquids over 100 ml are confiscated!'],
+['v',2,'What is a "gate" at the airport?',['The entrance to the plane','The ticket counter','The baggage claim','The security check'],0,'Gate = entrance to the plane!'],
+['v',2,'"We are taking off!" What does "take off" mean?',['To land on the ground','To leave the ground and fly','To remove your shoes','To delay the plane'],1,'Take off = start flying!'],
+['v',2,'What is "baggage claim"?',['Where you collect your suitcase','Where you buy tickets','A security scanner','A waiting lounge'],0,'Baggage claim = collect your luggage.'],
+['v',3,'Saya lost her ticket! She should go to the ___ desk.',['Information','Duty-Free','Restroom','Souvenir shop'],0,'Go to the Information desk for help!'],
+['v',3,'A "layover" is…',['a short stop between two flights','a lost suitcase','a first-class seat','a passport check'],0,'Layover = a stop between flights.'],
+['l',1,'🎧 Press 🔊. Which gate must the passenger go to?',['Gate 3','Gate 5','Gate 8','Terminal 5'],1,'Transcript: “Passengers for Almaty, please go to gate five.”','Passengers for Almaty, please go to gate five.'],
+['l',2,'🎧 Press 🔊. What is the problem?',['The flight is delayed','The flight is cancelled','The gate has changed','A bag is lost'],0,'Transcript: “Flight 201 to London is delayed by two hours.”','Attention please. Flight two zero one to London is delayed by two hours.'],
+['l',2,'🎧 Press 🔊. When does check-in close?',['30 minutes before','40 minutes before','1 hour before','at departure'],1,'Transcript: “Check-in closes forty minutes before departure.”','Check-in closes forty minutes before departure.'],
+['l',3,'🎧 Press 🔊. What does the officer ask for?',['Passport and boarding pass','Only a visa','A hotel booking','A baggage tag'],0,'Transcript: “Could I see your passport and your boarding pass, please?”','Could I see your passport and your boarding pass, please?']];
+const W=[['check-in','registering for your flight','"Check-in closes 40 minutes before departure."'],['boarding pass','a document that lets you board','"Please show your boarding pass."'],['gate','the door to your plane','"Go to gate 5."'],['baggage claim','where you collect luggage','"Meet me at baggage claim."'],['customs','officers who check goods you bring in','"She went through customs."'],['passport control','checking your passport and visa','"The line at passport control is long."'],['departure','leaving; the flight takes off','"Departure time: 14:30."'],['arrival','reaching the destination','"Arrival hall is downstairs."'],['delay','when a flight is late','"The flight has a two-hour delay."'],['layover','a short stop between two flights','"I have a layover in Dubai."'],['security check','scanning bags and people','"Take out your laptop at the security check."'],['duty-free','a shop with no local taxes','"I bought gifts at duty-free."']];
+const P='<em>Nursultan Nazarbayev International Airport</em> (TSE) is the main airport in Kazakhstan. It has <strong>two terminals</strong>: Terminal 1 for domestic flights and Terminal 2 for international flights. There are <strong>24 check-in desks</strong>, 8 gates, and a large duty-free shop. The airport <em>opened</em> in 1969 and was <em>renovated</em> in 2017. Every day, about <strong>10,000 passengers</strong> pass through the airport.';
+let qs=[],i=0,ok=0,bad=0,anger=0,done=false,tm,nx,mode='all',mute=false,last=null,ac,lvl=1,N=15,pts=0,streak=0,hinted=false,tst=false,used=[],lis=0;
+$('sQ').textContent=Q.length;$('sW').textContent=W.length;
+// tabs
+function tab(t){document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.id===t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$('nav').classList.remove('show');if(t==='results')showRes();scrollTo(0,0)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(t)tab(t.dataset.tab)});
+$('menu').onclick=()=>$('nav').classList.toggle('show');
+$('snd').onclick=()=>{mute=!mute;$('snd').textContent=mute?'🔇':'🔊'};
+// sound
+function snd(k){if(mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.connect(g);g.connect(ac.destination);
+ if(k==='ok'){o.frequency.setValueAtTime(523,n);o.frequency.exponentialRampToValueAtTime(659,n+.15)}else if(k==='no'){o.type='sawtooth';o.frequency.setValueAtTime(180,n);o.frequency.linearRampToValueAtTime(110,n+.25)}else{o.type='triangle';o.frequency.setValueAtTime(440,n);o.frequency.setValueAtTime(554,n+.1);o.frequency.setValueAtTime(659,n+.2)}
+ g.gain.setValueAtTime(.15,n);g.gain.exponentialRampToValueAtTime(.01,n+.35);o.start(n);o.stop(n+.4)}catch(e){}}
+// hero canvas
+(function(){const c=$('cv'),x=c.getContext('2d');let w,h,S=[],pl=[];function rs(){w=c.width=c.offsetWidth;h=c.height=c.offsetHeight}rs();addEventListener('resize',rs);
+ for(let k=0;k<60;k++)S.push([Math.random(),Math.random(),Math.random()*1.6+.3,Math.random()*6]);for(let k=0;k<4;k++)pl.push([Math.random(),Math.random()*.8+.1,.0004+Math.random()*.0006]);
+ (function f(t){x.clearRect(0,0,w,h);S.forEach(s=>{x.globalAlpha=.4+.4*Math.sin(t/700+s[3]);x.fillStyle='#fff';x.beginPath();x.arc(s[0]*w,s[1]*h,s[2],0,7);x.fill()});x.globalAlpha=.55;x.font='26px serif';pl.forEach(p=>{p[0]+=p[2];if(p[0]>1.1)p[0]=-.1;x.fillText('✈️',p[0]*w,p[1]*h)});requestAnimationFrame(f)})(0)})();
+// words
+$('wg').innerHTML=W.map(w=>`<div class="fc"><div class="fi"><div class="fa"><b>${w[0]}</b><small>tap to flip</small><div><button class="mini" data-say="${w[0]}">🔊</button><button class="mini" data-mic="${w[0]}">🎤</button></div><small class="rs"></small></div><div class="fb">${w[1]}<i>${w[2]}</i></div></div></div>`).join('');
+$('wg').onclick=e=>{const b=e.target.closest('button');if(b){if(b.dataset.say)say(b.dataset.say);else mic(b.dataset.mic,b.closest('.fa').querySelector('.rs'));return}const f=e.target.closest('.fc');if(f)f.classList.toggle('f')};
+// mode chips
+$('chips').onclick=e=>{const c=e.target.closest('.chip');if(!c)return;mode=c.dataset.m;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))};
+const sh=a=>a.slice().sort(()=>Math.random()-.5);
+const TST=[1,4,8,9,13,15,19,21,23,25];
+const AL={streak5:'5 correct in a row',perfect:'No mistakes',listener:'Good listener (3 audio answers)',tester:'Completed the test',speaker:'Great pronunciation'};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function save(s){try{localStorage.setItem('saya',JSON.stringify(s))}catch(e){}}
+function toast(t){const d=document.createElement('div');d.className='tt';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2500)}
+function ach(k){const s=store();s.a=s.a||{};if(!s.a[k]){s.a[k]=1;save(s);toast('🏆 '+AL[k])}}
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t).replace(/_+/g,'blank').replace(/[\u{1F300}-\u{1FAFF}]/gu,''));u.lang='en-US';u.rate=.9;speechSynthesis.speak(u)}catch(e){}}
+function mic(w,out){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){out.textContent='Speech recognition: please use Chrome';return}
+ const r=new SR();r.lang='en-US';r.maxAlternatives=3;out.textContent='🎤 Listening…';
+ const n=t=>t.toLowerCase().replace(/-/g,' ').replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim(),want=n(w);
+ r.onresult=e=>{const h=Array.from(e.results[0]).map(a=>n(a.transcript)),hit=h.some(x=>x===want||x.replace(/ /g,'')===want.replace(/ /g,''));out.textContent=(hit?'✅ ':'❌ ')+'heard: '+h[0];if(hit)ach('speaker')};
+ r.onerror=()=>{out.textContent='⚠️ Microphone not available'};r.start()}
+// adaptive pick: level follows the answers; topics with many mistakes are asked more often
+function pick(){const w=store().w||{};let c=[];Q.forEach((q,n)=>{if(!used.includes(n)&&(mode==='all'||mode==='w'||q[0]===mode))c.push(n)});
+ let L=c.filter(n=>Q[n][1]===lvl);for(let d=1;d<3&&!L.length;d++)L=c.filter(n=>Math.abs(Q[n][1]-lvl)===d);
+ const k=mode==='w'?4:1,wt=L.map(n=>1+(w[Q[n][0]]||0)*k);let r=Math.random()*wt.reduce((a,b)=>a+b,0),x=L[L.length-1];
+ for(let j=0;j<L.length;j++){r-=wt[j];if(r<=0){x=L[j];break}}used.push(x);return Q[x]}
+function track(q,k,good){const s=store(),n=Q.indexOf(q);s.w=s.w||{};s.m=(s.m||[]).filter(m=>m.q!==n);
+ if(good)s.w[q[0]]=Math.max(0,(s.w[q[0]]||0)-1);else{s.w[q[0]]=Math.min(6,(s.w[q[0]]||0)+1);s.m.unshift({q:n,k:k});s.m=s.m.slice(0,30)}save(s)}
+function extra(s){$('nm').value=$('nm').value||s.n||'';
+ $('ba').innerHTML=s.pre==null?'Take the 📊 Test in the Play tab before you start practising.':'Before: <b>'+s.pre+'%</b> → After: <b>'+(s.post==null?'—':s.post+'%')+'</b>'+(s.post==null?' · take the test again after practising.':' ('+(s.post-s.pre>=0?'+':'')+(s.post-s.pre)+' points)');
+ $('bg').innerHTML=Object.keys(AL).map(k=>'<span class="bd '+(s.a&&s.a[k]?'':'lock')+'">🏆 '+AL[k]+'</span>').join('');
+ $('lbx').innerHTML=s.lb&&s.lb.length?'<table class="lb"><tr><th>#</th><th>Name</th><th>⭐</th><th>%</th></tr>'+s.lb.map((r,j)=>'<tr><td>'+(j+1)+'</td><td>'+esc(r.n)+'</td><td>'+r.p+'</td><td>'+r.c+'%</td></tr>').join('')+'</table>':'No games yet.';
+ $('mx').innerHTML=s.m&&s.m.length?s.m.map(m=>{const q=Q[m.q];return '<div class="mis">'+esc(q[2])+'<br>❌ '+esc(m.k<0?'(time is up)':q[3][m.k])+' · ✅ <b>'+esc(q[3][q[4]])+'</b><br><small>'+esc(q[5])+'</small></div>'}).join(''):'No mistakes yet 🎉'}
+function distort(){if(anger<25)return P;const d=new DOMParser().parseFromString(P,'text/html'),w=document.createTreeWalker(d.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){let v=n.nodeValue;if(anger<60)v=v.replace(/airport/gi,'airprot').replace(/terminal/gi,'terminl').replace(/passengers/gi,'pasengers');else v=v.replace(/airport/gi,'AIRPORTT').replace(/passengers/gi,'PASNGERS').toUpperCase();n.nodeValue=v}return d.body.innerHTML}
+function ui(){$('pt').textContent=pts;$('af').style.width=anger+'%';$('al').textContent=anger+'%';$('rd').innerHTML=distort();$('em').textContent=anger<30?'😐':anger<65?'😠':'🤬';const a=anger>=60;$('app').classList.toggle('angry',a);$('qb').classList.toggle('ang',a);
+ if(anger>=100){clearInterval(tm);clearTimeout(nx);setTimeout(()=>fin(true),400)}}
+function timer(T){clearInterval(tm);let l=T;$('tb').style.width='100%';$('tb').style.background='#a78bfa';tm=setInterval(()=>{l-=.1;const p=l/T*100;$('tb').style.width=p+'%';if(p<30)$('tb').style.background='#ef4444';if(l<=0){clearInterval(tm);ans(-1)}},100)}
+const NM={g:'📝 GRAMMAR',r:'📖 READING',v:'✈️ VOCABULARY',l:'🎧 LISTENING'};
+function render(){if(i>=N)return fin(false);const q=qs[i]=qs[i]||pick();$('qy').textContent=NM[q[0]];$('qn').textContent=`${i+1} / ${N}`;$('qt').textContent=q[2];$('lv').textContent='LEVEL '+q[1];hinted=false;$('hn').classList.toggle('hid',tst);$('sp').onclick=()=>say(q[6]||q[2]);
+ $('op').innerHTML='';q[3].forEach((o,k)=>{const b=document.createElement('div');b.className='opt';b.tabIndex=0;b.dataset.k=k;b.textContent=String.fromCharCode(65+k)+'. '+o;b.onclick=()=>ans(k);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ans(k)}};$('op').appendChild(b)});
+ done=false;ui();timer(q[0]==='r'||q[0]==='l'?20:16);if(q[0]==='l'&&!mute)setTimeout(()=>say(q[6]),300)}
+function ans(k){if(done)return;done=true;clearInterval(tm);const q=qs[i],good=k===q[4];document.querySelectorAll('.opt').forEach((b,n)=>{b.classList.add('off');if(n===q[4])b.classList.add('ok');else if(n===k)b.classList.add('no')});
+ if(good){snd('ok');ok++;$('c1').textContent=ok;if(!tst)anger=Math.max(0,anger-12);lvl=Math.min(3,lvl+1);streak++;pts+=10;if(streak>=5)ach('streak5');if(q[0]==='l'&&++lis>=3)ach('listener')}else{snd('no');navigator.vibrate&&navigator.vibrate(200);bad++;$('c2').textContent=bad;if(!tst)anger=Math.min(100,anger+25);lvl=Math.max(1,lvl-1);streak=0;$('app').classList.add('shake');setTimeout(()=>$('app').classList.remove('shake'),400);$('qt').textContent=(k===-1?"⏱️ Time's up! ":'')+q[5]}
+ track(q,k,good);ui();if(anger<100)nx=setTimeout(()=>{i++;render()},good?1200:2200)}
+function store(){try{return JSON.parse(localStorage.getItem('saya')||'{}')}catch(e){return{}}}
+function fin(dep){clearInterval(tm);$('en').classList.remove('hid');$('fc').textContent=ok;$('ft').textContent=qs.length;const pct=Math.round(ok/qs.length*100),win=!dep&&pct>=70;
+ if(dep){snd('no');$('et').textContent='🚨 DEPORTED!';$('emsg').textContent='The officer lost all patience and revoked Saya’s entry visa!'}else{if(win)snd('win');$('et').textContent='🛬 Flight over';$('emsg').textContent=win?'🌟 Great job! Saya made her flight safely.':'💀 Saya missed her flight. Study the word bank and try again!'}
+ if(tst){$('et').textContent='📊 Test complete';$('emsg').textContent='Result saved: '+pct+'%. See Results → Before / After.'}
+ const s=store();if(tst){if(s.pre==null)s.pre=pct;else s.post=pct}else s.lb=(s.lb||[]).concat({n:$('pn').value.trim()||'Player',p:pts,c:pct}).sort((a,b)=>b.p-a.p).slice(0,10);s.g=(s.g||0)+1;s.c=(s.c||0)+ok;s.t=(s.t||0)+ok+bad;s.b=Math.max(s.b||0,dep?0:pct);last={pct:pct,win:win};s.l=last;try{localStorage.setItem('saya',JSON.stringify(s))}catch(e){}if(tst)ach('tester');if(!tst&&!dep&&bad===0&&ok>=10)ach('perfect')}
+function start(){clearInterval(tm);clearTimeout(nx);const s0=store();s0.n=$('pn').value.trim();save(s0);tst=mode==='t';used=[];lvl=1;pts=streak=lis=0;
+ if(tst){qs=TST.map(n=>Q[n]);N=qs.length}else{qs=[];N=Math.min(15,Q.filter(q=>mode==='all'||mode==='w'||q[0]===mode).length)}
+ i=ok=bad=anger=0;$('c1').textContent=$('c2').textContent='0';$('en').classList.add('hid');$('pick').classList.add('hid');$('gm').classList.remove('hid');render()}
+function menu(){clearInterval(tm);clearTimeout(nx);anger=0;$('app').classList.remove('angry');$('gm').classList.add('hid');$('pick').classList.remove('hid')}
+$('go').onclick=start;$('again').onclick=start;$('rs').onclick=menu;
+addEventListener('keydown',e=>{if($('play').classList.contains('on')&&!$('gm').classList.contains('hid')&&!done){const m={A:0,B:1,C:2,D:3,1:0,2:1,3:2,4:3},k=m[e.key.toUpperCase()];if(k!==undefined&&qs[i]&&k<qs[i][3].length)ans(k)}});
+function showRes(){const s=store();extra(s);$('rG').textContent=s.g||0;$('rB').textContent=(s.b||0)+'%';$('rA').textContent=s.t?Math.round(s.c/s.t*100)+'%':'0%';const l=s.l;
+ const can=l&&l.win;$('nm').classList.toggle('hid',!can);$('cb').classList.toggle('hid',!can);if(can)$('cm').textContent='Congratulations! Enter your name to get your certificate.'}
+$('cb').onclick=()=>{const s=store();$('cn').textContent=$('nm').value.trim()||'Saya’s friend';$('cs').textContent=(s.l?s.l.pct:0)+'%';$('ct').classList.remove('hid')};
+$('hn').onclick=()=>{if(done||hinted||tst)return;hinted=true;pts=Math.max(0,pts-5);ui();let n=0;[...document.querySelectorAll('.opt')].sort(()=>Math.random()-.5).forEach(b=>{if(n<2&&+b.dataset.k!==qs[i][4]){b.classList.add('hid');n++}})};
+$('clr').onclick=()=>{const s=store();s.m=[];s.w={};save(s);showRes()};
+$('pn').value=store().n||'';
+})();
+</script></body></html>
